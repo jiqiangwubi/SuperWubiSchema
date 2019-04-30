@@ -1,0 +1,116 @@
+# Rime schema settings
+# encoding: utf-8
+# generated at 2019-04-29 15:05:45.924526 by 小泉
+# vim: et:ts=2:sw=2:sts=2:fenc=utf8:ft=yaml
+#
+# [Description] 
+#   由极爽码表转换
+
+schema:
+  schema_id: jswubi
+  name: 极爽4.3五笔
+  version: "0.5.4"
+  author:
+    - "xq / 风入松"
+  description:
+    敲 z 键进入拼音反查，依赖 pinyin_simp 方案
+    由极爽4.3码表转换
+  dependencies:
+    - pinyin_simp
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ "中文", "西文" ]
+  - name: full_shape
+    states: [ "半角", "全角" ]
+  - name: s2t
+    states: [ 常规, 繁体 ]
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - echo_translator
+    - punct_translator
+    - reverse_lookup_translator
+    - table_translator
+  filters:
+    - simplifier
+    - uniquifier
+
+speller:
+  alphabet: zyxwvutsrqponmlkjihgfedcba
+  delimiter: " '"
+  max_code_length: 4
+  use_space: false
+  auto_select: true
+
+translator:
+  dictionary: &dict
+    jswubi
+  enable_charset_filter: false
+  enable_encoder: false
+  enable_user_dict: false
+  enable_sentence: false
+  enable_encoder: false
+  encode_commit_history: false
+  initial_quality: 5
+
+simplifier:
+  opencc_config: s2t.json
+  option_name: s2t
+  tags: [ abc ]
+  tips: all
+
+reverse_lookup:
+  closing_tips: "〔五笔〕"
+  dictionary: pinyin_simp
+  prefix: "z"
+  tips: 〔拼音〕
+  initial_quality: 1
+  preedit_format:
+    - "xform/([nl])v/$1ü/"
+    - "xform/([nl])ue/$1üe/"
+    - "xform/([jqxy])v/$1u/"
+
+key_binder:
+  import_preset: default
+  bindings:
+    - {when: has_menu, accept: semicolon, send: 2}
+    - {when: has_menu, accept: apostrophe, send: 3}
+    - {when: always, accept: Release+Escape, toggle: ascii_mode}
+    - {when: paging, accept: comma, send: Page_Up}
+    - {when: has_menu, accept: period, send: Page_Down}
+
+punctuator:
+  import_preset: symbols
+  half_shape:
+    '/' : [ '/', ／, ÷ ]
+    '#' : '#'
+    '\' : '、'
+    #'=' : '='
+
+recognizer:
+  import_preset: default
+  patterns:
+    email: "^[a-z][-_.0-9a-z]*@.*$"
+    url: "^(www[.]|https?:|ftp:|mailto:).*$"
+    reverse_lookup: "z[a-y]*$"
+    punct: "^/([a-z]+|[0-9])$"
+    uppercase: ""
+
+

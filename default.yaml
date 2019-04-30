@@ -14,6 +14,7 @@ schema_list:
   - schema: wubinew_pinyin
   - schema: xfwb
   - schema: xdwb3.22
+  - schema: jswubi
 
 switcher:
   caption: 〔方案選單〕
