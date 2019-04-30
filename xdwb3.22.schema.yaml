@@ -1,0 +1,97 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  schema_id: xdwb3.22
+  name: "现代五笔3.22版"
+  version: "0.20"
+  author:
+    - 发明人 李明先生 ，制作人 前缘后惠
+  description: |
+    现代五笔3.22版升级历程： 
+    现代五笔3.1版是爱好者根据2.95版改进的，旨在优化指法，打字更舒服，字根“讠”从W键移动到Y键，字根“大”从A键移动到N键，取消N键上的字根“用”，A键增加字根“而”，H键增加亡字底。现代五笔3.22版是在3.1版的基础上，增加了七个新字根：即在A键上加入“酉”，在W键上加入“辛”，在L键上加入“车”，在O键上加入“鱼、饣”，在P键上加入“走”，在T键上增加先字头。这七个字根的加入，使现代五笔输入法的重码率更低、输入效率更高。
+    时间：二〇一七年四月二十四日
+    现代五笔3.22版交流群：QQ：250636140
+    码表源自 http://zhangxfok.ys168.com/
+    敲 z 鍵進入拼音反查
+  dependencies:
+    - pinyin_simp
+
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: extended_charset
+    states: [ 通用, 增廣 ]
+  - options: [ utf8, gb2312, gbk]
+    states:
+      - UTF-8
+      - GB2312
+      - GBK
+
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+  translators:
+    - punct_translator
+    - reverse_lookup_translator
+    - table_translator
+  filters:
+    - charset_filter@gb2312
+    - charset_filter@gbk
+speller:
+  #自动顶屏
+  #auto_select: false
+  auto_select: true
+  delimiter: "~"
+  max_code_length: 4
+
+translator:
+  dictionary: xdwb3.22
+  enable_charset_filter: true
+  enable_sentence: true
+  enable_encoder: true
+  encode_commit_history: true
+  max_phrase_length: 4
+  #逐渐提示
+  #enable_completion: false
+  enable_completion: true
+  enable_user_dict: false
+  disable_user_dict_for_patterns:
+    - "^z.*$"
+
+reverse_lookup:
+  dictionary: pinyin_simp
+  prefix: "z"
+  suffix: "'"
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+
+punctuator:
+  import_preset: default
+
+key_binder:
+  import_preset: default
+
+recognizer:
+  import_preset: default
+  patterns:
+    reverse_lookup: "^z[a-z]*'?$"

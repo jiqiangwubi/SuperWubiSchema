@@ -1,0 +1,196 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  name: "新世纪五笔"
+  schema_id: wubinew
+  author:
+    - "發明人 王永民"
+  description: |
+    新世纪五笔版
+    碼表源自 yanhuacuo
+    敲 z 鍵進入拼音反查
+  dependencies:
+    - pinyin_simp   
+  version: 0.10.custom.3495643459
+  
+switches:
+  - name: ascii_mode
+    reset: 0
+    states: [ 中文, 西文 ]
+  - name: full_shape
+    states: [ 半角, 全角 ]
+  - name: extended_charset
+    reset: 1
+    states: [ 常用, 增廣 ]
+  - name: ascii_punct
+    states: [ 。，, ．， ]
+  - name: zh_simp
+    reset: 1
+    states: [ 汉字, 漢字 ]
+  - name: emoji_cn      #Emoji开关
+    states: [ 〇, 😊]   #显示在状态栏的图标
+    reset: 1            #默认开启  
+  - options: [ utf8, gbk, gb2312, big5 ]
+    states:	  
+    - UTF-8
+    - GBK
+    - GB2312
+    - BIG5
+        
+customization: 3495643459
+engine:
+  processors:
+    - ascii_composer
+    - recognizer
+    - key_binder
+    - speller
+    - punctuator
+    - selector
+    - navigator
+    - express_editor
+#    - fluid_editor
+#    - chord_composer
+  segmentors:
+    - ascii_segmentor
+    - matcher
+    - abc_segmentor
+    - punct_segmentor
+    - fallback_segmentor
+#    - affix_segmentor
+  translators:
+    - echo_translator
+    - punct_translator
+    - table_translator
+#    - script_translator
+    - reverse_lookup_translator
+    - history_translator
+    
+  filters:
+    - simplifier  # 必要組件一
+    - uniquifier  # 必要組件二
+    - charset_filter@utf8
+    - charset_filter@gbk
+    - charset_filter@gb2312
+    - charset_filter@big5    
+    - reverse_lookup_filter@wubinew_lookup
+    - simplifier@emoji_cn   #Emoji滤镜
+#    - cjk_minifier
+#    - reverse_lookup_filter
+
+speller:
+  auto_select: true
+  delimiter: "~"
+  max_code_length: 4
+
+translator:
+  dictionary: wubinew
+  enable_charset_filter: true
+  enable_completion: true
+  enable_encoder: false
+  enable_sentence: false
+  enable_user_dict: true
+  encode_commit_history: true
+  max_phrase_length: 4
+  disable_user_dict_for_patterns:
+    - "^z.*$"
+ 
+history:
+  input: v
+  
+#Emoji滤镜配置
+emoji_cn:
+  opencc_config: emoji.json   #Emoji词典配置文件
+  option_name: emoji_cn    #与状态栏开关的名称一致
+  tips: all    #开启注释 
+  
+reverse_lookup:
+  dictionary: pinyin_simp
+  prefix: "`"
+  suffix: "'"
+  tips: 〔拼音〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+  
+simplifier:
+  opencc_config: s2twp.json
+  option_name: zh_simp
+  tags: [ abc ] #abc對應abc_segmentor
+  tips: none
+    
+punctuator:
+  import_preset: symbols
+  
+key_binder:
+  import_preset: default
+  bindings: 
+    - { when: paging, accept: comma, send: comma }
+    - { when: has_menu, accept: period, send: period }  
+    - { when: has_menu, accept: "#", toggle: emoji_cn }   # 在输入过程中，切换Emoji开关的快捷键，这里用井号切换
+
+recognizer:
+  import_preset: wubinew.custom
+  patterns:
+    email: "^[a-z][-_.0-9a-z]*@.*$"
+    url: "^(www[.]|https?:|ftp:|mailto:).*$"
+    reverse_lookup: "^z[a-z]*;?$"
+#    pinyin_lookup: "`P[a-z]*;?$"
+#    jyutping_lookup: "`J[a-z]*;?$"
+#    pinyin: "(?<!`)P[a-z']*;?$"
+#    jyutping: "(?<!`)J[a-z']*;?$"
+    punct: "^/([0-9]0?|[a-z]+)$" #配合symbols.yaml中的特殊字符輸入
+    
+
+menu:
+#  alternative_select_keys: ASDFGHJKL #如編碼字符佔用數字鍵則須另設選字鍵
+  page_size: 6 #選單每䈎顯示個數
+
+style:
+ keyboards: 
+    -  qwerty
+    -  number
+    -  symbols
+    -  edit
+    -  move
+    -  bqrw1
+    -  bqrw2
+    -  bqrw3
+    -  bqrw4
+    -  bqrw5
+    -  bqqt1
+    -  bqqt2
+    -  bqqt3
+    -  bqqt4
+    -  bqqz1
+    -  bqqz2
+    -  bqqz3
+    -  bqqz4
+    -  bqqz5
+    -  bqpt1
+    -  bqpt2
+    -  bqhd1
+    -  bqhd2
+    -  bqhc1
+    -  bqhc2
+    -  bqlx1
+    -  bqlx2
+    -  bqlx3
+    -  bqlx4
+    -  bqlx5
+    -  bqkj1
+    -  bqkj2
+    -  bqkj3
+    -  bqkj4
+    -  bqfh1
+    -  bqfh2
+    -  bqfh3
+    -  bqfh4
+    -  kao_fond
+    -  kao_sad
+    -  kao_mad
+    -  kao_astonished
+    -  kao_impotent
+    -  kao_happy #鍵盤配置
+

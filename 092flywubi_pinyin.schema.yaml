@@ -1,0 +1,245 @@
+# Rime schema settings
+# encoding: utf-8
+
+schema:
+  schema_id: 092flywubi_pinyin
+  name: "092飘逸版五笔拼音"
+  version: "0.9"
+  author:
+    - 09五笔作者 行走的风景
+    - 092五笔飘逸版@QQ:Yellow/Green（2540079345）
+  description: |
+    092五筆＋漢語拼音混合輸入+字海两分反查。
+    碼表源自 ibus-table
+  dependencies:
+    - pinyin_simp
+    - liangfen
+
+switches:
+  - name: emoji_segestion
+    reset: 0
+    states: [ 表, 情 ]
+  - name: bqj_segestion
+    states: [ 普, 靓 ]
+  - name: ascii_mode
+    reset: 0
+    states: [ 中, 英 ]
+  - name: full_shape
+    states: [ 半, 全 ]
+  - name: zh_simp
+    #reset: 0
+    states: [ 简, 繁 ]
+  - name: pinyin_segestion
+    #reset: 0
+    states: [ 音, 注 ]
+  - name: yitizi_segestion
+    #reset: 0
+    states: [ 本, 异 ]
+  - name: extended_charset
+    #reset: 0
+    states: [ 常, 增 ]
+  - name: ascii_punct
+    states: [ 。，, ．， ]
+
+engine:                             # 輸入引擎設定，即掛接組件的「處方」
+  processors:                       # 一、這批組件處理各類按鍵消息
+    - ascii_composer                # ※ 處理西文模式及中西文切換
+    - recognizer                    # ※ 與 matcher 搭配，處理符合特定規則的輸入碼，如網址、反查等
+    - key_binder                    # ※ 在特定條件下將按鍵綁定到其他按鍵，如重定義逗號、句號爲候選翻頁鍵
+    - speller                       # ※ 拼寫處理器，接受字符按鍵，編輯輸入碼
+    - punctuator                    # ※ 句讀處理器，將單個字符按鍵直接映射爲文字符號
+    - selector                      # ※ 選字處理器，處理數字選字鍵、上、下候選定位、換頁鍵
+    - navigator                     # ※ 處理輸入欄內的光標移動鍵
+    - express_editor                # ※ 編輯器，處理空格、回車上屏、回退鍵等
+    #- fluid_editor                  # ※ 句式編輯器，用於以空格斷詞、回車上屏的【注音】、【語句流】等輸入方案，
+                                    # ※ 替換 express_editor，也可以寫作 fluency_editor
+  segmentors:                       # 二、這批組件識別不同內容類型，將輸入碼分段
+    - ascii_segmentor               # ※ 標識西文段落
+    - matcher                       # ※ 標識符合特定規則的段落，如網址、反查等
+    - "affix_segmentor@liangfen"
+    - "affix_segmentor@reverse_lookup"
+    - abc_segmentor                 # ※ 標識常規的文字段落
+    - punct_segmentor               # ※ 標識句讀段落
+    - fallback_segmentor            # ※ 標識其他未標識段落
+  translators:                      # 三、這批組件翻譯特定類型的編碼段爲一組候選文字
+    - echo_translator               # ※ 沒有其他候選字時，回顯輸入碼
+    - punct_translator              # ※ 轉換標點符號
+    - reverse_lookup_translator     # ※ 反查翻譯器，用另一種編碼方案查碼
+    - "script_translator@liangfen"
+    - "script_translator@pinyin_lookup"
+    - codepoint_translator
+    - table_translator              # ※ 碼表翻譯器，用於倉頡、五筆等基於碼表的輸入方案，替換 script_translator
+    - table_translator@fixed        # ※ 碼表翻譯器，用於异体字基於碼表的輸入方案，替換 script_translator
+    - table_translator@symbols      # ※ 碼表翻譯器，用於特殊符号基於碼表的輸入方案，替換 script_translator
+    - table_translator@fixed2
+#    - script_translator
+    - history_translator@history
+
+  filters:                          # 四、這批組件過濾翻譯的結果
+    - simplifier                    # ※ 繁簡轉換
+    - uniquifier                    # ※ 過濾重複的候選字，有可能來自繁簡轉換
+#   - charset_filter@utf8
+#   - charset_filter@gbk
+#   - charset_filter@gb2312
+#   - charset_filter@big5
+    - "reverse_lookup_filter@092flywubi_pinyin_lookup"
+    - "reverse_lookup_filter@liangfen_reverse_lookup"
+#   - simplifier@emoji_cn   #Emoji滤镜
+    - "simplifier@zh_simp"
+    - "simplifier@bq_simp"
+    - "simplifier@emoji_switch"
+    - "simplifier@pinyin_switch"
+    - "simplifier@yitizi_switch"
+
+    
+
+speller:
+  #auto_select: true
+  delimiter: " '"
+  #max_code_length: 4
+translator:
+  dictionary: 092flywubi
+  prism: 092flywubi_pinyin
+  enable_charset_filter: true
+  enable_sentence: true
+  enable_encoder: true
+  enable_user_dict: true
+  encode_commit_history: true
+  # max_phrase_length: 4
+  disable_user_dict_for_patterns:
+    - "^z.*$"
+    - "^.....?$"
+
+history:
+  input: vz
+  size: 3
+  initial_quality: 10000
+#Emoji滤镜配置
+emoji_cn:
+  opencc_config: emoji.json   #Emoji词典配置文件
+# option_name: emoji_cn    #与状态栏开关的名称一致
+  option_name: emoji_segestion   #与状态栏开关的名称一致
+  tags:
+    - abc
+  tips: all    #开启注释
+
+yitizi_switch:
+  opencc_config: yitizi.json
+  option_name: yitizi_segestion
+  show_in_comment: true
+  #random: true
+  tags:
+    - abc
+  tips: char
+
+zh_simp:
+  opencc_config: s2t.json
+  option_name: s2t_segestion
+  tags:
+    - abc
+  tips: char
+
+bq_simp:
+  opencc_config: bqj.json
+  option_name: bqj_segestion
+  tags:
+    - abc
+  tips: char
+
+pinyin_switch:
+  opencc_config: pinyin.json
+  option_name: pinyin_segestion
+  show_in_comment: true
+  comment_format:
+    - xform/'/ /
+  tags:
+    - abc
+  tips: all
+
+abc_segmentor:
+  extra_tags:
+    - reverse_lookup
+    - liangfen_reverse_lookup
+
+liangfen:
+  dictionary: liangfen
+  enable_charset_filter: true
+  initial_quality: 0.1
+  preedit_format:
+    - "xlit|v|ü|"
+    - xform/iü/iv/
+    - xform/uü/uv/
+  comment_format:
+    - "xlit|v|ü|"
+    - xform/iü/iv/
+    - xform/uü/uv/
+  prefix: "#"
+  suffix: ";"
+  tag: liangfen
+  tips: "【两分】"
+liangfen_lookup:
+  dictionary: liangfen
+  preedit_format:
+    - "xlit|v|ü|"
+    - xform/iü/iv/
+    - xform/uü/uv/
+  comment_format:
+    - "xlit|v|ü|"
+    - xform/iü/iv/
+    - xform/uü/uv/  
+  prefix: "#"
+  suffix: ";"
+  tag: liangfen_lookup
+  tips: "【两分反查】"
+liangfen_reverse_lookup:
+  dictionary: 092wubi
+  overwrite_comment: false
+  tags:
+    - liangfen_lookup
+
+reverse_lookup:
+  dictionary: pinyin_simp
+  prefix: "`"
+  suffix: "'"
+  tips: 〔拼音反查〕
+  preedit_format:
+    - xform/([nl])v/$1ü/
+    - xform/([nl])ue/$1üe/
+    - xform/([jqxy])v/$1u/
+
+simplifier:
+  opencc_config: s2twp.json
+  option_name: zh_simp
+  tags: [ abc ] #abc對應abc_segmentor
+  tips: none
+
+punctuator:
+  import_preset: symbols
+
+key_binder:
+  import_preset: default
+  bindings:
+    #- { when: composing, accept: Return, send: Escape }
+    - { when: always, accept: "Control+Shift+dollar", toggle: zhs_zht }
+    - { when: always, accept: "Control+Shift+percent", toggle: encode }
+    - { when: has_menu, accept: comma, send: comma }
+    - { when: has_menu, accept: period, send: period }
+    - { when: has_menu, accept: semicolon, send: 2 }
+    #- { when: has_menu, accept: apostrophe, send: 3 }
+    - { when: has_menu, accept: "#", toggle: emoji_cn }   # 在输入过程中，切换Emoji开关的快捷键，这里用井号切换
+
+recognizer:
+  import_preset: default
+  patterns:
+    email: "^[a-z][-_.0-9a-z]*@.*$"
+    url: "^(www[.]|https?:|ftp:|mailto:).*$"
+    reverse_lookup: "`[a-z]*;?$"
+#    pinyin_lookup: "`P[a-z]*;?$"
+#    jyutping_lookup: "`J[a-z]*;?$"
+#    pinyin: "(?<!`)P[a-z']*;?$"
+#    jyutping: "(?<!`)J[a-z']*;?$"
+    punct: "^/([0-9]0?|[a-z]+)$" #配合symbols.yaml中的特殊字符輸入
+menu:
+#  alternative_select_keys: ASDFGHJKL #如編碼字符佔用數字鍵則須另設選字鍵
+  page_size: 10 #選單每䈎顯示個數
+
